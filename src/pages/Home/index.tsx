@@ -1,16 +1,26 @@
 import { useState, useEffect } from "react"
 import "./styles.css"
-import { Card } from "../../components/card"
+import { Card, ICardProps } from "../../components/card"
+
+interface IProfileResponse {
+  name: string;
+  avatar_url: string;
+}
+
+interface IUser {
+  name: string;
+  avatar: string;
+}
 
 export function Home() {
-  const [user, setUser] = useState({name: "", avatar: ""})
-  const [studentName, setStudentName] = useState("");
-  const [students, setStudents] = useState([])
-
+  const [user, setUser] = useState<IUser>({} as IUser);
+  const [students, setStudents] = useState<ICardProps[]>([])
+  const [studentName, setStudentName] = useState<string>("");
+  
   useEffect(() => {
     async function fetchData() {
       const response = await fetch("https://api.github.com/users/corvoholmes")
-      const data = await response.json()
+      const data = await response.json() as IProfileResponse;
 
       setUser({
         name: data.name,
@@ -23,11 +33,6 @@ export function Home() {
   
 
   function handleAddStudent() {
-    if (!studentName) {
-      alert("O nome precisa ser preenchido!")
-      return;
-    }
-
     const newStudent = {
       name: studentName,
       time: new Date().toLocaleTimeString("pt-br", {
@@ -37,7 +42,7 @@ export function Home() {
       })
     }
 
-    setStudents([...students, newStudent])
+    setStudents((prevState) =>[...prevState, newStudent])
 
   }
 
@@ -57,7 +62,12 @@ export function Home() {
       placeholder="Digite o nome ..."
       onChange={(e) => { setStudentName(e.target.value) }} 
     />
-    <button onClick={handleAddStudent}>Adicionar</button>
+    <button 
+      disabled={!studentName}
+      onClick={handleAddStudent}
+    >
+      Adicionar
+    </button>
 
     {students.map((student) => (
         <Card key={student.time} name={student.name} time={student.time} />
